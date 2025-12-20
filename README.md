@@ -38,7 +38,7 @@ A professional, web-based GUI application to manage library operations efficient
 ## ⚙️ How to Run
 
 1.  **Clone the project:** ```bash
-    git clone [https://github.com/your-username/library-system.git](https://github.com/your-username/library-system.git)
+    git clone  https://github.com/shivayyadav01/guvi_review2
     ```
 2.  **Open in IntelliJ IDEA:** Import as a Maven project.
 3.  **Configure Tomcat:** Add **Apache Tomcat 10.1** in your Run Configurations.
