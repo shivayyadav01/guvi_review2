@@ -1,69 +1,125 @@
 package com.library.dao;
 
 import com.library.model.Book;
+import com.library.util.DBConnection;
+
+import java.sql.*;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class BookDAO {
-    // In-memory list to store books
-    private static List<Book> books = new ArrayList<>();
-    private static int idCounter = 1;
 
-    // Static block to add some initial dummy data
-    static {
-        books.add(new Book(idCounter++, "Java Programming", "James Gosling", 599.0, "Education", "ISBN001"));
-        books.add(new Book(idCounter++, "Clean Code", "Robert Martin", 850.0, "Software", "ISBN002"));
-        books.add(new Book(idCounter++, "The Alchemist", "Paulo Coelho", 299.0, "Fiction", "ISBN003"));
-    }
-
-    // Get all books
+    // 🔹 GET ALL BOOKS
     public List<Book> getAllBooks() {
-        return new ArrayList<>(books);
-    }
+        List<Book> list = new ArrayList<>();
+        String sql = "SELECT * FROM books ORDER BY id DESC";
 
-    // Add new book
-    public void addBook(Book book) {
-        book.setId(idCounter++);
-        if (book.getStatus() == null) {
-            book.setStatus("AVAILABLE");
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                Book b = new Book();
+                b.setId(rs.getInt("id"));
+                b.setTitle(rs.getString("title"));
+                b.setAuthor(rs.getString("author"));
+                b.setPrice(rs.getDouble("price"));
+                b.setCategory(rs.getString("category"));
+                b.setIsbn(rs.getString("isbn"));
+                b.setStatus(rs.getString("status"));
+                b.setStudentName(rs.getString("student_name"));
+                b.setPublishYear(rs.getInt("publish_year"));
+                list.add(b);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        books.add(book);
+        return list;
     }
 
-    // Find book by ID
+    // 🔹 ADD BOOK
+    public void addBook(Book b) {
+        String sql = "INSERT INTO books(title,author,price,category,isbn,status,publish_year) VALUES (?,?,?,?,?,?,?)";
+
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setString(1, b.getTitle());
+            ps.setString(2, b.getAuthor());
+            ps.setDouble(3, b.getPrice());
+            ps.setString(4, b.getCategory());
+            ps.setString(5, b.getIsbn());
+            ps.setString(6, "AVAILABLE");
+            ps.setInt(7, b.getPublishYear());
+
+            ps.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    // 🔹 GET BOOK BY ID
     public Book getBookById(int id) {
-        return books.stream()
-                .filter(b -> b.getId() == id)
-                .findFirst()
-                .orElse(null);
+        String sql = "SELECT * FROM books WHERE id=?";
+        Book b = null;
+
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setInt(1, id);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                b = new Book();
+                b.setId(id);
+                b.setTitle(rs.getString("title"));
+                b.setAuthor(rs.getString("author"));
+                b.setPrice(rs.getDouble("price"));
+                b.setCategory(rs.getString("category"));
+                b.setIsbn(rs.getString("isbn"));
+                b.setStatus(rs.getString("status"));
+                b.setStudentName(rs.getString("student_name"));
+                b.setPublishYear(rs.getInt("publish_year"));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return b;
     }
 
-    // Delete book
+    // 🔹 DELETE BOOK
     public void deleteBook(int id) {
-        books.removeIf(b -> b.getId() == id);
+        String sql = "DELETE FROM books WHERE id=?";
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            ps.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
-    // Professional Statistics for Dashboard
-    public Map<String, Object> getStatistics() {
-        Map<String, Object> stats = new HashMap<>();
+    // 🔹 ISSUE BOOK
+    public void issueBook(int id, String studentName) {
+        String sql = "UPDATE books SET status='ISSUED', student_name=? WHERE id=?";
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, studentName);
+            ps.setInt(2, id);
+            ps.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
-        long totalBooks = books.size();
-        double totalValue = books.stream().mapToDouble(Book::getPrice).sum();
-        double avgPrice = totalBooks > 0 ? totalValue / totalBooks : 0.0;
-
-        // Issued vs Available counts
-        long issuedBooks = books.stream().filter(b -> "ISSUED".equals(b.getStatus())).count();
-        long availableBooks = totalBooks - issuedBooks;
-
-        long categoriesCount = books.stream().map(Book::getCategory).distinct().count();
-
-        stats.put("totalBooks", totalBooks);
-        stats.put("totalValue", totalValue);
-        stats.put("avgPrice", avgPrice);
-        stats.put("categories", categoriesCount);
-        stats.put("issuedBooks", issuedBooks);
-        stats.put("availableBooks", availableBooks);
-
-        return stats;
+    // 🔹 RETURN BOOK
+    public void returnBook(int id) {
+        String sql = "UPDATE books SET status='AVAILABLE', student_name=NULL WHERE id=?";
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            ps.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

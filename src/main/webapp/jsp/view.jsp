@@ -1,150 +1,81 @@
-<%@ page import="java.text.DecimalFormat" %>
-<%
-    Book book = (Book) request.getAttribute("book");
-    DecimalFormat df = new DecimalFormat("#,##0.00");
-%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page import="java.util.*, com.library.model.Book" %>
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>View Book - <%= book.getTitle() %></title>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory | Library System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: Arial, sans-serif; background: #f5f5f5; }
+        :root { --primary: #4f46e5; --success: #10b981; --danger: #ef4444; --text: #1e293b; }
+        body { font-family: 'Inter', sans-serif; background: #f8fafc; margin: 0; padding: 40px; color: var(--text); }
+        .container { max-width: 1200px; margin: auto; background: white; padding: 30px; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 2px solid #f1f5f9; padding-bottom: 20px; }
 
-        .navbar {
-            background: #2c3e50;
-            color: white;
-            padding: 15px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .nav-logo { display: flex; align-items: center; gap: 10px; }
-        .nav-menu { display: flex; gap: 20px; }
-        .nav-menu a {
-            color: white;
-            text-decoration: none;
-            padding: 8px 16px;
-            border-radius: 4px;
-            transition: background 0.3s;
-        }
-        .nav-menu a:hover { background: #34495e; }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; padding: 15px; background: #f1f5f9; color: #64748b; font-size: 13px; text-transform: uppercase; }
+        td { padding: 15px; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
 
-        .container { max-width: 800px; margin: 20px auto; padding: 0 20px; }
+        .badge { padding: 5px 12px; border-radius: 99px; font-size: 11px; font-weight: 600; }
+        .AVAILABLE { background: #dcfce7; color: #166534; }
+        .ISSUED { background: #fee2e2; color: #991b1b; }
 
-        .book-details {
-            background: white;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-
-        .detail-row {
-            display: flex;
-            margin-bottom: 15px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid #eee;
-        }
-        .detail-label {
-            width: 150px;
-            font-weight: bold;
-            color: #2c3e50;
-        }
-        .detail-value {
-            flex: 1;
-        }
-
-        .btn {
-            display: inline-block;
-            padding: 10px 20px;
-            text-decoration: none;
-            border-radius: 4px;
-            margin-right: 10px;
-            color: white;
-        }
-        .btn-edit { background: #f39c12; }
-        .btn-back { background: #3498db; }
-        .btn-delete { background: #e74c3c; }
+        .btn { text-decoration: none; font-weight: 600; font-size: 13px; padding: 6px 12px; border-radius: 6px; transition: 0.2s; }
+        .btn-issue { color: var(--primary); border: 1px solid var(--primary); }
+        .btn-issue:hover { background: var(--primary); color: white; }
+        .btn-return { color: var(--success); border: 1px solid var(--success); }
+        .btn-return:hover { background: var(--success); color: white; }
+        .btn-delete { color: var(--danger); margin-left: 10px; }
+        .btn-back { color: #64748b; text-decoration: none; font-size: 14px; }
     </style>
 </head>
 <body>
-<!-- Navigation -->
-<nav class="navbar">
-    <div class="nav-logo">
-        <h2>📚 Digital Library</h2>
-    </div>
-    <div class="nav-menu">
-        <a href="books?action=home">🏠 Home</a>
-        <a href="books">📖 Books</a>
-        <a href="books?action=add">➕ Add Book</a>
-        <a href="books?action=statistics">📊 Statistics</a>
-    </div>
-</nav>
 
-<!-- Main Content -->
 <div class="container">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-        <h1>Book Details</h1>
-        <div>
-            <a href="books?action=edit&id=<%= book.getId() %>" class="btn btn-edit">✏️ Edit</a>
-            <a href="books" class="btn btn-back">← Back to List</a>
-        </div>
+    <div class="header">
+        <h1>Inventory Management</h1>
+        <a href="books?action=home" class="btn-back">← Back to Dashboard</a>
     </div>
 
-    <div class="book-details">
-        <div class="detail-row">
-            <div class="detail-label">Book ID</div>
-            <div class="detail-value">#<%= book.getId() %></div>
-        </div>
-
-        <div class="detail-row">
-            <div class="detail-label">Title</div>
-            <div class="detail-value"><strong><%= book.getTitle() %></strong></div>
-        </div>
-
-        <div class="detail-row">
-            <div class="detail-label">Author</div>
-            <div class="detail-value"><%= book.getAuthor() %></div>
-        </div>
-
-        <div class="detail-row">
-            <div class="detail-label">Price</div>
-            <div class="detail-value">₹<%= df.format(book.getPrice()) %></div>
-        </div>
-
-        <div class="detail-row">
-            <div class="detail-label">Category</div>
-            <div class="detail-value"><%= book.getCategory() %></div>
-        </div>
-
-        <div class="detail-row">
-            <div class="detail-label">ISBN</div>
-            <div class="detail-value"><%= book.getIsbn() %></div>
-        </div>
-
-        <div class="detail-row">
-            <div class="detail-label">Publish Year</div>
-            <div class="detail-value"><%= book.getPublishYear() %></div>
-        </div>
-
-        <div class="detail-row">
-            <div class="detail-label">Status</div>
-            <div class="detail-value">
-                    <span style="padding: 3px 8px; border-radius: 3px;
-                        <% if("AVAILABLE".equals(book.getStatus())) { %>
-                            background: #d4edda; color: #155724;
-                        <% } else if("ISSUED".equals(book.getStatus())) { %>
-                            background: #fff3cd; color: #856404;
-                        <% } else { %>
-                            background: #f8d7da; color: #721c24;
-                            <% } %>">
-                        <%= book.getStatus() %>
-                    </span>
-            </div>
-        </div>
-    </div>
+    <table>
+        <thead>
+        <tr>
+            <th>Book Title</th>
+            <th>Author</th>
+            <th>Price</th>
+            <th>Status</th>
+            <th>Current Holder</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <%
+            List<Book> books = (List<Book>) request.getAttribute("books");
+            if (books != null) {
+                for (Book b : books) {
+        %>
+        <tr>
+            <td style="font-weight: 600;"><%= b.getTitle() %></td>
+            <td><%= b.getAuthor() %></td>
+            <td>₹<%= b.getPrice() %></td>
+            <td><span class="badge <%= b.getStatus() %>"><%= b.getStatus() %></span></td>
+            <td><%= b.getStudentName() != null ? b.getStudentName() : "-" %></td>
+            <td>
+                <% if ("AVAILABLE".equals(b.getStatus())) { %>
+                <a href="books?action=issuePage&id=<%= b.getId() %>" class="btn btn-issue">Issue Book</a>
+                <% } else { %>
+                <a href="books?action=return&id=<%= b.getId() %>" class="btn btn-return">Return Book</a>
+                <% } %>
+                <a href="books?action=delete&id=<%= b.getId() %>" class="btn btn-delete" onclick="return confirm('Are you sure?')">Delete</a>
+            </td>
+        </tr>
+        <%
+                }
+            }
+        %>
+        </tbody>
+    </table>
 </div>
+
 </body>
 </html>

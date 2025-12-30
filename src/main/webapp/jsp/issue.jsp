@@ -3,27 +3,42 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Issue Book</title>
+    <meta charset="UTF-8">
+    <title>Issue Book | Library</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <style>
-        body { font-family: Arial; background: #f4f7f6; padding: 50px; }
-        .card { background: white; padding: 30px; max-width: 400px; margin: auto; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        input { width: 100%; padding: 12px; margin: 15px 0; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
-        button { background: #3498db; color: white; border: none; padding: 12px; width: 100%; cursor: pointer; border-radius: 4px; font-weight: bold; }
+        body { font-family: 'Inter', sans-serif; background: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .form-card { background: white; padding: 40px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
+        h2 { margin-top: 0; color: #1e293b; font-size: 20px; }
+        .book-info { background: #f1f5f9; padding: 15px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; }
+        label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 14px; color: #64748b; }
+        input[type="text"] { width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 20px; box-sizing: border-box; }
+        .btn-submit { width: 100%; background: #4f46e5; color: white; padding: 12px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+        .btn-submit:hover { background: #4338ca; }
+        .cancel-link { display: block; text-align: center; margin-top: 15px; color: #64748b; text-decoration: none; font-size: 14px; }
     </style>
 </head>
 <body>
-<div class="card">
-    <% Book book = (Book) request.getAttribute("book"); %>
+
+<div class="form-card">
+    <% Book b = (Book) request.getAttribute("book"); %>
     <h2>Issue Book</h2>
-    <p><strong>Book:</strong> <%= book.getTitle() %></p>
-    <form action="books" method="POST">
-        <input type="hidden" name="action" value="issue">
-        <input type="hidden" name="bookId" value="<%= book.getId() %>">
-        <input type="text" name="studentName" placeholder="Enter Student Name" required>
-        <button type="submit">Confirm Issue</button>
+    <div class="book-info">
+        <strong>Book:</strong> <%= b.getTitle() %><br>
+        <strong>Author:</strong> <%= b.getAuthor() %>
+    </div>
+
+    <form action="books" method="post">
+        <input type="hidden" name="formType" value="issue">
+        <input type="hidden" name="bookId" value="<%= b.getId() %>">
+
+        <label for="studentName">Student Full Name</label>
+        <input type="text" id="studentName" name="studentName" placeholder="Enter student name" required>
+
+        <button type="submit" class="btn-submit">Confirm Transaction</button>
+        <a href="books?action=list" class="cancel-link">Cancel and Go Back</a>
     </form>
-    <br>
-    <a href="books?action=list">Cancel</a>
 </div>
+
 </body>
 </html>
